@@ -43,6 +43,26 @@ main（小光，读取本 SKILL.md 后充当编排中心）
 └── 全程：main 补发关键推送到各职能群 + 监控群（sub-agent 推送不可靠）
 ```
 
+### Workspace 架构
+
+**独立 Workspace**：
+- `~/.openclaw/workspace` - main agent 工作区（编排中心）
+- `~/.openclaw/workspace-brainstorming` - brainstorming agent 工作区
+- `~/.openclaw/workspace-gemini` - gemini (织梦) agent 工作区
+- `~/.openclaw/workspace-{agent}` - 其他 agent 各自的工作区
+
+**协作文件路径**：
+- 共享上下文：`workspace/shared-context/` (THESIS.md, FEEDBACK-LOG.md, SIGNALS.md)
+- Agent 协作：`workspace/intel/` (单写者原则，多读者)
+- 流水线产物：`workspace/specs/`, `workspace/benchmarks/`, `workspace/cache/`
+- 历史记录：`workspace/epoch-history.json`, `workspace/classification-history.json`, `workspace/cost-tracking.json`
+
+**文件传递规则**：
+- Sub-agent 在自己的 workspace 中工作
+- 产出文件通过 task 返回值传递给 main
+- Main 整合后保存到共享路径（workspace/specs/, workspace/cache/ 等）
+- 跨 agent 协作通过 workspace/intel/ 目录（单写者原则）
+
 ### 知识层集成（珊瑚 NotebookLM）
 - Step 1.5：spawn 珊瑚查询 openclaw-docs / memory notebook 获取相关上下文
 - Step 6：spawn 珊瑚查询 notebook 辅助文档生成
