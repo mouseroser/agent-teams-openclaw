@@ -46,10 +46,10 @@ main（小光，读取本 SKILL.md 后充当编排中心）
 ### Workspace 架构
 
 **Agent 工作目录**：
-- `~/.openclaw/agents/brainstorming/workspace/specs/` - Spec-Kit 产物
-- `~/.openclaw/agents/gemini/workspace/reports/` - 分析报告
-- `~/.openclaw/agents/coding/workspace/` - 代码产物
-- `~/.openclaw/agents/{agent}/workspace/` - 各 agent 的工作产物
+- `~/.openclaw/agents/brainstorming/specs/` - Spec-Kit 产物
+- `~/.openclaw/agents/gemini/reports/` - 分析报告
+- `~/.openclaw/agents/coding/` - 代码产物
+- `~/.openclaw/agents/{agent}/` - 各 agent 的工作产物直接放在 agent 目录下
 
 **共享 Workspace**：
 - `~/.openclaw/workspace/` - Main agent 和跨 agent 协作
@@ -62,9 +62,9 @@ main（小光，读取本 SKILL.md 后充当编排中心）
 - `workspace/*.json` - 历史记录
 
 **文件传递规则**：
-- 每个 agent 在自己的 workspace 中生成工作产物
+- 每个 agent 在自己的目录中生成工作产物
 - 通过 intel/ 目录传递摘要或索引（单写者原则）
-- Main agent 或其他 agent 直接读取 agent workspace 获取完整产物
+- Main agent 或其他 agent 直接读取 agent 目录获取完整产物
 
 ### 知识层集成（珊瑚 NotebookLM）
 - Step 1.5：spawn 珊瑚查询 openclaw-docs / memory notebook 获取相关上下文
