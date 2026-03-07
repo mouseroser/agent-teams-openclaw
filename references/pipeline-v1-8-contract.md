@@ -1,5 +1,7 @@
 # Pipeline v1.8 Contract (Agent Teams)
 
+> Deprecated: v1.8 已被 `pipeline-v1-9-contract.md` 取代。除非明确需要回看历史版本，否则默认不要再用此文件作为当前星链合约依据。
+
 Source of truth: `PIPELINE_FLOWCHART_V1_8_EMOJI.md`.
 
 ## 1) Global State

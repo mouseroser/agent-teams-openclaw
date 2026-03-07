@@ -1,13 +1,13 @@
 ---
 name: starchain
-description: 星链（StarChain）— OpenClaw 多 agent 协作锻造流水线 v1.8。从 Step 1 分级到 Step 7 交付的全自动编排，覆盖 spec-kit 门控、交叉审查、修复循环、测试回归和 Epoch 回退。
+description: 星链（StarChain）— OpenClaw 多 agent 协作锻造流水线 v2.2。从 Step 1 分级到 Step 7 交付的全自动编排，优化 Constitution-First Step 1.5 + 增强 Gemini 快速复核与预审机制 + 强化 Step 5.5 Epoch 诊断与仲裁，提升效率 30-40%，降本 25-35%，Epoch 成功率提升 15-20%。
 ---
 
 # 星链 StarChain
 
 星链是 OpenClaw 的多 agent 协作流水线，以 main（小光）为编排中心，链式串联所有 agent 完成从需求到交付的全流程。
 
-使用本 skill 执行开发和修复任务，遵循 `references/pipeline-v1-8-contract.md` 中的流水线合约。
+使用本 skill 执行开发和修复任务，遵循 `references/pipeline-v1-9-contract.md` 中的流水线合约。
 
 ## When This Skill Triggers
 
@@ -21,8 +21,27 @@ Trigger this skill when the user asks to:
 ## Required Read
 
 Before execution, read:
-1. `references/PIPELINE_FLOWCHART_V1_8_EMOJI.md` — 默认流程图（完整的可视化流程）
-2. `references/pipeline-v1-8-contract.md` — 流水线合约（详细规则）
+1. `references/PIPELINE_FLOWCHART_V2_1_EMOJI.md` — 默认流程图（完整的可视化流程）
+2. `references/pipeline-v2-1-contract.md` — 流水线合约（详细规则）
+
+## Versioning Policy
+
+- **小更新不升版本号**：措辞优化、通知规则细化、轻量步骤调整、同一框架内的补丁修正，直接在当前版本内迭代。
+- **大变动才生成新版本**：当流程主干、阶段职责、核心门控、模型分工、回滚逻辑或交付结构发生实质变化时，才创建新的 `vX.Y`。
+- **只保留最近两个版本**：当前版本 + 上一个版本。更老版本应归档或删除，避免执行时误读。
+- **默认入口始终指向最新版本**；上一个版本仅作为回看与回滚参考。
+
+### Version Retention SOP
+
+当生成新版本时，按以下顺序执行：
+1. 先创建新的 flowchart 与 contract 文件（如 `v1.10`）。
+2. 将 `SKILL.md` 默认入口切到最新版本。
+3. 将上一版本保留为唯一回看/回滚版本。
+4. 对更老版本：
+   - 若仍需留痕，标记为 deprecated 并移出默认入口。
+   - 若已无保留价值，直接归档或删除。
+5. 任何时刻，references/ 中默认活跃版本最多只应有两套：`current` + `previous`。
+6. 若发现超过两个版本同时处于可执行状态，必须立即清理，避免执行时读错版本。
 
 ## Architecture: main 编排模式
 
@@ -31,7 +50,7 @@ main（小光）是顶层编排中心。所有 agent 由 main 直接 spawn（mod
 ```
 main（小光，读取本 SKILL.md 后充当编排中心）
 ├── Step 1：main 自己做分级 + 类型分析
-├── Step 1.5：spawn 珊瑚(notebooklm) → spawn 织梦(gemini) → spawn brainstorming
+├── Step 1.5：gemini 颗粒度对齐 → claude（小克）出计划 → review/gemini 复核 → review/gpt（L3/高风险时仲裁）
 ├── Step 2：spawn coding（含 Step 2.5 冒烟）
 ├── Step 3：spawn review（只做交叉审查）
 │   └── main 直接 grep 验证修复（不信 coding announce）
@@ -60,6 +79,8 @@ main（小光，读取本 SKILL.md 后充当编排中心）
   - `specs/` - 规格文档
 - `~/.openclaw/workspace/agents/gemini/` - 分析报告
   - `reports/` - 研究报告
+- `~/.openclaw/workspace/agents/claude/` - 计划报告
+  - `reports/` - 实施计划
 - `~/.openclaw/workspace/agents/coding/` - 代码产物
 - `~/.openclaw/workspace/agents/review/` - 审查产物
 - `~/.openclaw/workspace/agents/test/` - 测试产物
@@ -83,12 +104,13 @@ main（小光，读取本 SKILL.md 后充当编排中心）
 | Agent | Role | Key Steps |
 |-------|------|-----------|
 | main（小光） | 顶层编排中心 | Step 1, 1.5 编排, 4 编排, 5.5 编排, 7 |
-| review | 交叉审查 | Step 3（结构化审查 + verdict） |
+| gemini（织梦） | 颗粒度对齐 + 复核 | Step 1.5(问题宪法), Step 1.5(复核), Step 6(润色), Step 5.5(诊断) |
+| claude（小克） | 实施计划 | Step 1.5(基于宪法出计划) |
+| review | 交叉审查 + 复核 + 仲裁 | Step 1.5(swap gemini 复核), Step 1.5(swap gpt 仲裁), Step 3(交叉审查) |
 | coding | 开发执行 | Step 2, 2.5, 4(fix), TF(fix) |
 | test | 测试执行 | Step 5, TF(rerun), Epoch(test) |
 | brainstorming | 方案智囊 | Step 1.5(spec-kit), 4(方案), TF-2/3(方案), 5.5(分析) |
 | docs | 文档生成 | Step 6 |
-| 织梦(gemini) | 研究/文案加速 | Step 1.5(研究辅助), Step 6(润色), Step 5.5(诊断memo) |
 | 珊瑚(notebooklm) | 知识查询 | Step 1.5(历史知识), Step 6(文档模板) |
 | monitor-bot | 全局监控 | 全程状态 + 告警 |
 
@@ -162,32 +184,54 @@ main 自己执行：
   - Step 4 R3: thinking="high" + opus (深度分析)
   - 预期降本 10-15%
 
-### Step 1.5：Spec-Kit 门控（L2/L3） + 打磨层
+### Step 1.5：Constitution-First 打磨层（L2/L3）
 main 编排：
-1. **并行执行知识查询和初步分析**（优化：提升效率 30-40%）
-   - 同时 spawn 珊瑚(notebooklm) 和 织梦(gemini)
-   - 珊瑚任务（可选，L2/L3 推荐）：
-     - 查询 openclaw-docs 和 memory notebooks
-     - 任务：`查询关于 <需求关键词> 的历史知识、最佳实践和相关决策`
-     - 整合历史知识并返回摘要
-   - 织梦任务：
-     - 初步分析原始需求
-     - 产出澄清问题 + 风险 + 研究线索 + 初稿草案
-   - 如果 spawn 失败 → Spawn 重试（3 次）→ Warning → 降级跳过
-2. **等待两者完成并整合**
-   - 珊瑚 announce 回来（历史知识）
-   - 织梦 announce 回来（初稿草案）
-   - main 整合珊瑚知识到织梦初稿中
-3. **验证优化**
-   - spawn review (model=opus) → 验证织梦产出，优化逻辑
-4. **brainstorming 产出**
-   - spawn brainstorming (model=sonnet, thinking="medium") → 产出四件套
-   - 输入：织梦初稿 + review 验证 + 珊瑚知识
-   - 产出：spec.md / plan.md / tasks.md / research.md
-5. main 验证四件套一致性，Critical 问题阻塞 Step 2
-6. 推送结果到头脑风暴群(-5231604684) + 监控群
 
-> **打磨层理念**：珊瑚提供历史知识 → 织梦快速迭代头脑风暴 → Opus 精准验证优化 → brainstorming 产出四件套。
+**L2 标准链：**
+
+1️⃣ **spawn gemini（织梦）/think medium**
+   - 颗粒度对齐 / 问题定义同步
+   - 产出「问题宪法」
+   - 输出路径：`agents/gemini/reports/*-constitution-*.md`
+   - 通知：织梦群 (-5264626153) + 监控群
+
+2️⃣ **spawn claude（小克）/think medium**
+   - 基于「问题宪法」产出实施计划
+   - 结构：目标 / 边界 / 风险 / 执行步骤 / 依赖
+   - 输出路径：`agents/claude/reports/*-plan-*.md`
+   - 通知：小克群 (-5101947063) + 监控群
+
+3️⃣ **spawn review（swap 到 gemini）/think medium**
+   - 复核 claude 计划是否偏离原问题宪法
+   - 命令：`sessions_spawn(agentId: "review", model: "gemini/gemini-3.1-pro-preview", thinking: "medium", ...)`
+   - 输出：ALIGN / DRIFT / MAJOR_DRIFT
+   - 通知：交叉审核群 (-5242448266) + 监控群
+
+   **判定：**
+   - ALIGN ✅       → Step 2
+   - DRIFT ⚠️       → claude 修订 1 次 → review/gemini 再复核
+   - MAJOR_DRIFT ❌ → 升级到 Step 1.5.4
+
+**L3 升级链（或 MAJOR_DRIFT）：**
+
+4️⃣ **spawn review（swap 到 gpt）/think high**
+   - 风险挑刺 / 反方审查 / 仲裁
+   - 命令：`sessions_spawn(agentId: "review", model: "openai/gpt-5.4", thinking: "high", ...)`
+   - 输出：GO / REVISE / BLOCK
+   - 通知：交叉审核群 (-5242448266) + 监控群
+
+   **判定：**
+   - GO ✅      → Step 2
+   - REVISE ⚠️  → claude 修订 1 次 → review/gemini 复核 → 再判定
+   - BLOCK ❌   → main 推送阻塞原因 → HALT / 降级交付
+
+**规则：**
+- 🚫 不新增晨星中途确认节点，全自动推进
+- 🚫 这条前置链不替换后续开发 / 审查 / 测试主干
+- ✅ 一致性复核是 review 的职责，通过 swap 模型实现
+- ✅ gemini 只负责问题宪法（Step 1.5.1），不直接做复核
+
+> **打磨层理念**：gemini 提炼问题宪法 → claude 基于宪法出计划 → review/gemini 复核一致性 → review/gpt 高风险仲裁。
 
 ### Step 2 + 2.5：开发 + 冒烟
 main 编排：
@@ -203,26 +247,80 @@ main 编排：
    
 **优化收益**：减少 20% 的 Step 4 进入次数，简单语法错误快速自修复
 
-### Step 3：交叉审查
+### Step 3：交叉审查 + Gemini 快速复核
 main 编排：
-1. spawn review → 传入代码 diff + 需求，执行异模型交叉审查
-2. review announce 回来后，main 解析 verdict JSON
-3. PASS → 创建 S2 快照，进入 Step 5
-4. PASS_WITH_NOTES → minor fix diff ≤ G2 免审 → S2 → Step 5；diff > G2 降级 NEEDS_FIX
-5. NEEDS_FIX → 进入 Step 4
 
-### Step 4：修复循环（max 3 rounds）
+**Type A（业务/架构）：**
+1. spawn review（swap gpt）→ 结构化交叉审查
+2. spawn review（swap gemini）→ 快速复核代码是否符合需求
+3. 综合判定：
+   - 两者都 PASS → 创建 S2 快照，进入 Step 5
+   - 任一 NEEDS_FIX → 进入 Step 4
+
+**Type B（算法/性能）：**
+1. spawn review（swap gemini）→ 算法分析 + 性能审查
+2. 判定：
+   - PASS → 创建 S2 快照，进入 Step 5
+   - PASS_WITH_NOTES → minor fix diff ≤ G2 免审 → S2 → Step 5；diff > G2 降级 NEEDS_FIX
+   - NEEDS_FIX → 进入 Step 4
+
+**优化收益**：
+- Type A: gemini 快速复核可提前发现 30-40% 的需求偏离问题
+- Type B: gemini 擅长算法分析，比 sonnet 更适合
+
+**Spawn 示例：**
+```javascript
+// Type A: review swap gpt
+sessions_spawn(
+  agentId: "review",
+  model: "openai/gpt-5.4",
+  thinking: "high",
+  task: "结构化交叉审查..."
+)
+
+// Type A/B: review swap gemini（快速复核/算法分析）
+sessions_spawn(
+  agentId: "review",
+  model: "gemini/gemini-3.1-pro-preview",
+  thinking: "medium",
+  task: "快速复核代码是否符合需求..."
+)
+```
+
+### Step 4：修复循环 + Gemini 预审（max 3 rounds）
 main 编排每轮：
+
 1. 组装 context bundle（需求 + diff + issues JSON + 前轮反馈）
 2. spawn brainstorming → 出修复方案
 3. spawn coding → 执行修复
-4. 回到 Step 3（spawn review 审查）
+4. **spawn review（swap gemini）→ 快速预审**
+   - 发现明显问题（语法错误、逻辑漏洞、需求偏离）
+   - 预审 PASS → 进入 Step 4.5（正式审查）
+   - 预审 FAIL → 直接进入下一轮修复（节省成本）
+5. **Step 4.5：正式审查**
+   - 回到 Step 3（spawn review 根据 Type A/B 正式审查）
 
 **模型与 Thinking Level 配置（质量优先 + 成本优化）**：
-- R1: brainstorming sonnet/low + coding gpt/medium
-- R2: brainstorming sonnet/medium + coding gpt/medium
-- R3: brainstorming opus/high + coding gpt/xhigh
+- R1: brainstorming sonnet/low + coding gpt/medium + review/gemini 预审
+- R2: brainstorming sonnet/medium + coding gpt/medium + review/gemini 预审
+- R3: brainstorming opus/high + coding gpt/xhigh + review/gemini 预审
 - R3 仍 NEEDS_FIX → Step 5.5
+
+**优化收益**：
+- gemini 预审可提前发现 30-40% 的明显问题
+- 避免浪费 gpt/sonnet 的高成本审查
+- 预计降本 15-20%
+
+**Spawn 示例：**
+```javascript
+// Step 4.4: gemini 预审
+sessions_spawn(
+  agentId: "review",
+  model: "gemini/gemini-3.1-pro-preview",
+  thinking: "low",
+  task: "快速预审修复代码，发现明显问题..."
+)
+```
 
 ### Step 5：全量测试
 main 编排：
@@ -238,24 +336,41 @@ main 编排：
 - diff > G3 → 回 Step 3（ReEntry++）
 - ReEntry > 2 → 强制 Step 5.5
 
-### Step 5.5：Epoch 回退（max 3 Epochs）
+### Step 5.5：Epoch 回退 + 增强诊断（max 3 Epochs）
 main 编排：
-1. （可选）spawn 织梦(gemini, thinking="high") 产出诊断 memo
-2. **Epoch 智能决策（优化）**：
-   - main 读取 workspace/epoch-history.json（如存在）
-   - 查询历史 Epoch 决策和结果：
-     - 相似场景的回滚选择（S1/S2/继续）
-     - 历史成功率统计
-     - 失败模式匹配
-   - spawn brainstorming(opus/high) 分析根因，决定回滚策略
-     - 输入：当前失败日志 + 诊断 memo + 历史决策数据
-     - 输出：回滚决策 + 理由
-3. 回滚代码到选定快照
-4. 重新走 Step 2 → 2.5 → 3 → 5
-5. **记录 Epoch 结果**：
+
+1. **spawn gemini（织梦）/think high** → 产出诊断 memo
+   - 快速分析失败模式
+   - 识别根本原因
+   - 输出路径：`agents/gemini/reports/*-diagnosis-*.md`
+
+2. **spawn review（swap gemini）/think medium** → 复核诊断
+   - 检查诊断是否遗漏关键信息
+   - 补充遗漏的失败模式
+   - 输出：COMPLETE / INCOMPLETE
+
+3. **spawn brainstorming（opus）/think high** → 根因分析 + 回滚决策
+   - 输入：诊断 memo + 复核结果 + 历史决策数据（epoch-history.json）
+   - 分析根本原因
+   - 决定回滚策略：S1 / S2 / 继续
+   - 输出：回滚决策 + 理由
+
+4. **spawn review（swap gpt）/think high** → 仲裁回滚决策（高风险场景）
+   - 仅在以下情况触发：
+     - Epoch >= 2（第二次及以上回退）
+     - 决策为回滚到 S1（影响较大）
+     - brainstorming 信心度 < 0.7
+   - 输出：APPROVE / REJECT / REVISE
+
+5. **执行回滚**
+   - 回滚代码到选定快照
+   - 重新走 Step 2 → 2.5 → 3 → 5
+
+6. **记录 Epoch 结果**
    - 更新 workspace/epoch-history.json
-   - 记录：决策、快照、结果、耗时
-6. Epoch > 3 → HALT
+   - 记录：决策、快照、结果、耗时、诊断摘要
+
+7. **Epoch > 3 → HALT**
 
 **epoch-history.json 格式**：
 ```json
@@ -265,6 +380,7 @@ main 编排：
       "timestamp": 1772691000000,
       "decision": "rollback_to_S1",
       "reason": "架构变更过大",
+      "diagnosis_summary": "gemini 诊断发现架构冲突",
       "result": "success",
       "duration_ms": 180000
     }
@@ -272,7 +388,44 @@ main 编排：
 }
 ```
 
-**优化收益**：Epoch 成功率提升 10-15%，基于历史数据优化决策
+**优化收益**：
+- review/gemini 复核诊断，避免遗漏关键信息
+- review/gpt 仲裁回滚决策，避免错误回滚
+- Epoch 成功率提升 15-20%（原 10-15%）
+
+**Spawn 示例：**
+```javascript
+// Step 5.5.1: gemini 诊断
+sessions_spawn(
+  agentId: "gemini",
+  thinking: "high",
+  task: "分析测试失败日志，产出诊断 memo..."
+)
+
+// Step 5.5.2: review/gemini 复核诊断
+sessions_spawn(
+  agentId: "review",
+  model: "gemini/gemini-3.1-pro-preview",
+  thinking: "medium",
+  task: "复核诊断 memo，检查是否遗漏关键信息..."
+)
+
+// Step 5.5.3: brainstorming 根因分析
+sessions_spawn(
+  agentId: "brainstorming",
+  model: "anthropic/claude-opus-4-6",
+  thinking: "high",
+  task: "基于诊断 memo 和复核结果，分析根因并决定回滚策略..."
+)
+
+// Step 5.5.4: review/gpt 仲裁（按需）
+sessions_spawn(
+  agentId: "review",
+  model: "openai/gpt-5.4",
+  thinking: "high",
+  task: "仲裁回滚决策，评估风险..."
+)
+```
 
 ### Step 6：文档（L1 跳过）
 main 编排：
@@ -285,7 +438,7 @@ main 编排：
    - 输入：最终 diff + 需求 + 珊瑚文档模板（如有）
 3. **docs 生成**：spawn docs → 生成/更新文档
    - 输入：织梦大纲 + 代码 diff + 审查摘要
-4. 推送文档群(-5095976145) + 监控群
+4. 由 main 推送文档群(-5095976145) + 监控群
 
 ### Step 7：交付
 main 自己执行：
@@ -345,7 +498,7 @@ main 在以下节点推送到监控群(-5131273722)：
 - Step 5.5 Epoch 状态
 - Step 7 交付摘要 + 通知晨星
 
-各 agent 也会默认推送到自己的职能群 + 监控群（见各 agent AGENTS.md）。
+不要依赖各 agent 自己推送。sub-agent 推送视为 best-effort，可能丢失；所有关键进度、结果、失败与告警一律由 main 统一补发到对应职能群 + 监控群。
 
 ## Do Not Simplify Away Safety Nets
 

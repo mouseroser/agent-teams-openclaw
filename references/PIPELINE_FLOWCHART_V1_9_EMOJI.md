@@ -1,6 +1,4 @@
-# 🔄 Pipeline Flowchart v1.8 — Cross-Review Multi-Agent Delivery
-
-> Deprecated: v1.8 已被 `PIPELINE_FLOWCHART_V1_9_EMOJI.md` 取代。除非明确需要回看历史版本，否则默认不要再用此文件作为当前星链流程依据。
+# 🔄 Pipeline Flowchart v1.9 — Constitution-First Multi-Agent Delivery
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -36,48 +34,74 @@
        └────────────┘
 
 ═══════════════════════════════════════════════════════════
-  📐 Step 1.5 — Spec-Kit Gate (L2/L3 Only)
-  Based on: github.com/github/spec-kit
-  Executor: 🧠 brainstorming │ Orchestrator: ☀️ main
+  🧭 Step 1.5 — Constitution-First Preflight (L2/L3)
+  Orchestrator: ☀️ main
 ═══════════════════════════════════════════════════════════
 
-  打磨层流程（织梦打磨 + Opus 验证）：
-    0️⃣  spawn 织梦 (gemini) /think medium
-        → 产出澄清问题 + 风险 + 研究线索 + 初稿草案
+  核心思想：
+    先用 Gemini 做颗粒度对齐，把“问题定义”拉到同一层次
+    再由 Claude Code 基于问题宪法产出实施计划
+    再由 Gemini 复核一致性
+    仅在高风险 / 明显分歧 / L3 场景下启用 GPT 作为挑刺/仲裁位
 
-    0️⃣.5 spawn review /model opus
-        → 验证织梦产出，优化逻辑
+  ┌─────────────────────────────────────────────────────┐
+  │  L1: 跳过重前置链，直接走快速通道                   │
+  │  L2: Gemini → Claude Code → Gemini                 │
+  │  L3: Gemini → Claude Code → Gemini → GPT           │
+  └─────────────────────────────────────────────────────┘
 
-  四步流程：
-    1️⃣  specify → specs/{feature}/spec.md
-        ✅ 聚焦 WHAT/WHY，不涉及 HOW
-        ⚠️  模糊点标记 [NEEDS CLARIFICATION]
+  L2 标准链：
+    1️⃣  spawn 织梦 (gemini) /think medium
+        → 颗粒度对齐 / 问题定义同步
+        → 产出「问题宪法」
+        → 织梦群 + 监控群
 
-    2️⃣  plan → specs/{feature}/plan.md
-              + specs/{feature}/research.md
-              + specs/{feature}/contracts/（如需要）
-              + specs/{feature}/data-model.md（如需要）
-        ✅ 技术选型必须有理由
-        ✅ 架构决策追溯到 spec 需求
+    2️⃣  spawn Claude Code /think medium
+        → 基于「问题宪法」产出实施计划
+        → 结构：目标 / 边界 / 风险 / 执行步骤 / 依赖
+        → Claude Code 职能群 + 监控群
 
-    3️⃣  tasks → specs/{feature}/tasks.md
-        ✅ 按用户故事分组
-        ✅ 标注依赖关系，[P] 标记可并行
-        ✅ 每个任务包含文件路径
+    3️⃣  spawn 织梦 (gemini) /think medium
+        → 复核 Claude Code 计划是否偏离原问题
+        → 输出：ALIGN / DRIFT / MAJOR_DRIFT
+        → 织梦群 + 监控群
 
-    4️⃣  analyze → 一致性检查（spec ↔ plan ↔ tasks）
-        🚫 Critical → 修复后重新检查
-        ⚠️  Warning → 建议处理
-        ℹ️  Info → 优化建议
+       ALIGN ✅       → Step 2
+       DRIFT ⚠️       → Claude Code 修订 1 次 → Gemini 再复核
+       MAJOR_DRIFT ❌  → 升级 GPT 审核位
 
-       ✅ Gate passed → Step 2
-       📐 → 头脑风暴群 + 监控群
+  L3 升级链：
+    1️⃣  spawn 织梦 (gemini) /think medium
+        → 颗粒度对齐 / 问题宪法
+        → 织梦群 + 监控群
+
+    2️⃣  spawn Claude Code /think medium
+        → 基于问题宪法出实施计划
+        → Claude Code 职能群 + 监控群
+
+    3️⃣  spawn 织梦 (gemini) /think medium
+        → 一致性复核
+        → 织梦群 + 监控群
+
+    4️⃣  spawn GPT /think high
+        → 风险挑刺 / 反方审查 / 仲裁
+        → 输出：GO / REVISE / BLOCK
+        → GPT 审核群 + 监控群
+
+       GO ✅      → Step 2
+       REVISE ⚠️  → Claude Code 修订 1 次 → Gemini 复核 → 再判定
+       BLOCK ❌   → main 推送阻塞原因 → HALT / 降级交付
+
+  规则：
+    - 🚫 不新增晨星中途确认节点，全自动推进
+    - 🚫 这条前置链不替换后续开发 / 审查 / 测试主干
+    - ✅ 这是 v1.9 对 Step 1.5 的升级，不是新开第二条流水线
 
 ═══════════════════════════════════════════════════════════
   ⚡ L1 快速通道
 ═══════════════════════════════════════════════════════════
 
-  💻 coding（默认配置）→ 跳过 Spec-Kit + brainstorming
+  💻 coding（默认配置）→ 跳过重前置链
        │
        ▼
   🧪 冒烟测试
@@ -109,7 +133,7 @@
   └──────┬───────┘   └──────┬───────┘
          └───────┬───────────┘
                  ▼
-  按 tasks.md 顺序执行开发
+  按 Step 1.5 最终计划顺序执行开发
   💻 → 编程群 + 监控群
                  │
                  ▼
@@ -132,12 +156,18 @@
   Orchestrator: ☀️ main
 ═══════════════════════════════════════════════════════════
 
+  三模型交叉审核思路：
+    - Claude / GPT 作为主交叉审查模型对
+    - Gemini 参与研究诊断与必要复核
+    - 高分歧时再进入仲裁位
+
   main 根据 Step 1 判定的 Type 动态 spawn：
 
   Type A: coding(sonnet) 代码 → review(gpt/high) 交叉审查
   Type B: coding(gpt) 代码 → review(sonnet/medium) 交叉审查
 
   分歧仲裁（reviewer 提出问题 + coder 反驳时触发）：
+    → GPT / Claude 主审之外，必要时追加 Gemini 诊断摘要
     → review(opus/medium) + coding(gpt/xhigh)
     → 如果 coder 不反驳，reviewer 判定直接生效，无需仲裁
 
@@ -169,6 +199,7 @@
   每轮必须携带 context bundle：
   ┌─────────────────────────────────────────────────────┐
   │ - 原始需求                                          │
+  │ - Step 1.5 最终计划 / 问题宪法                       │
   │ - 当前代码 diff                                     │
   │ - 审查结构化反馈（issues JSON）                      │
   │ - 前轮修复 diff + 前轮审查反馈（如有）                │
@@ -232,9 +263,11 @@
 
   1. spawn gemini /think high
      → 产出诊断 memo
+     → 织梦群 + 监控群
 
   2. spawn brainstorming /model opus /think high
      → 根因分析 + 回滚决策
+     → 灵感熔炉群 + 监控群
 
   回滚选项（每 Epoch 开始时选择）：
     🔙 Rollback to S1
@@ -267,18 +300,23 @@
 
 ═══════════════════════════════════════════════════════════
   📝 Step 6 — Documentation (skip for L1)
-  Executor: 📝 docs │ /model opus /think high
+  Executor: 📝 docs
   Orchestrator: ☀️ main
 ═══════════════════════════════════════════════════════════
 
-  1. spawn gemini /think medium
-     → 产出交付说明/FAQ 大纲
+  1. spawn notebooklm /think medium
+     → 查询文档模板 / 历史知识
+     → 珊瑚群 + 监控群
 
-  2. spawn docs /model opus
+  2. spawn gemini /think medium
+     → 产出交付说明 / FAQ 大纲
+     → 织梦群 + 监控群
+
+  3. spawn docs
      → 生成/更新文档
+     → 文档群 + 监控群
 
-  输入：最终 diff + 需求 + 审查摘要 + spec-kit 产出
-  📝 → 文档群 + 监控群
+  输入：最终 diff + 需求 + 审查摘要 + Step 1.5 产出
 
 ═══════════════════════════════════════════════════════════
   📦 Step 7 — Final Delivery
@@ -293,6 +331,7 @@
     🏷️  Level: L1 / L2 / L3
     🏷️  Type: A / B / C
     📊 Delivery status: normal | degraded
+    🧭 Constitution / Plan summary
     📸 Snapshot tags: S1, S2, S3
 
   → 监控群 (-5131273722)
@@ -309,46 +348,50 @@
 ┌─────────────────────────────────────────────────────────┐
 │  Type A (业务/架构)                                      │
 ├─────────────────────────────────────────────────────────┤
-│  Step 2:  coding → sonnet/medium                        │
-│  Step 3:  review → gpt/high                             │
-│  Step 5:  test → gpt/medium                             │
-│  仲裁:    review(opus/medium) + coding(gpt/xhigh)       │
+│  Step 1.5: gemini → Claude Code → gemini               │
+│            (+ GPT 仲裁 for L3 / major drift)           │
+│  Step 2:   coding → sonnet/medium                      │
+│  Step 3:   review → gpt/high                           │
+│  Step 5:   test → gpt/medium                           │
+│  仲裁:     review(opus/medium) + coding(gpt/xhigh)     │
 └─────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────┐
 │  Type B (算法/性能)                                      │
 ├─────────────────────────────────────────────────────────┤
-│  Step 2:  coding → gpt/medium                           │
-│  Step 3:  review → sonnet/medium                        │
-│  Step 5:  test → sonnet/medium                          │
-│  仲裁:    review(opus/medium) + coding(gpt/xhigh)       │
+│  Step 1.5: gemini → Claude Code → gemini               │
+│            (+ GPT 仲裁 for L3 / major drift)           │
+│  Step 2:   coding → gpt/medium                         │
+│  Step 3:   review → sonnet/medium                      │
+│  Step 5:   test → sonnet/medium                        │
+│  仲裁:     review(opus/medium) + coding(gpt/xhigh)     │
 └─────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────┐
 │  修复升级路径（所有 Type）                               │
 ├─────────────────────────────────────────────────────────┤
-│  Step 4 R1/R2: brainstorming(sonnet/medium)             │
-│                + coding(gpt/medium)                     │
-│  Step 4 R3:    brainstorming(opus/high)                 │
-│                + coding(gpt/xhigh)                      │
-│  TF-2:         brainstorming(sonnet/medium)             │
-│  TF-3:         brainstorming(opus/high)                 │
-│  Step 5.5:     brainstorming(opus/high)                 │
+│  Step 4 R1/R2: brainstorming(sonnet/medium)            │
+│                 + coding(gpt/medium)                   │
+│  Step 4 R3:     brainstorming(opus/high)               │
+│                 + coding(gpt/xhigh)                    │
+│  TF-2:          brainstorming(sonnet/medium)           │
+│  TF-3:          brainstorming(opus/high)               │
+│  Step 5.5:      gemini(high) + brainstorming(opus/high)│
 └─────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────┐
 │  固定配置                                                │
 ├─────────────────────────────────────────────────────────┤
-│  main:         opus/high                                │
-│  monitor-bot:  minimax                                  │
-│  docs:         minimax/high                             │
-│  织梦(gemini): gemini-preview (Step 1.5: medium,        │
-│                                Step 5.5: high)          │
-│  brainstorming: sonnet (默认，动态切换到 opus)          │
+│  main:          opus/high                              │
+│  Claude Code:   主计划器 / 主执行规划者               │
+│  GPT:           审查 / 风险仲裁 / 压力测试             │
+│  织梦(gemini):  颗粒度对齐 + 一致性复核 + 诊断 memo     │
+│  珊瑚(nlm):     知识查询 / 模板 / 历史知识              │
+│  brainstorming: 方案生成（默认 sonnet，动态切换 opus）  │
 └─────────────────────────────────────────────────────────┘
 
 ═══════════════════════════════════════════════════════════
-  🛡️ Tool Resilience & Degradation (Step 3.5)
+  🛡️ Tool Resilience & Degradation
 ═══════════════════════════════════════════════════════════
 
   任何外部 CLI 依赖失败时（如 nlm-gateway.sh）：
@@ -374,9 +417,18 @@
   📢 Push Notification Rules
 ═══════════════════════════════════════════════════════════
 
+  默认原则：
+    • 有消息能力的 agent → 自己的职能群通知是主链路
+    • main → 监控群、缺失补发、最终交付、告警
+
+  通知粒度：
+    • 简单委派：开始 / 完成 / 失败
+    • 多智能体编排：开始 / 关键阶段 / 完成 / 失败
+    • 正式流水线：按实际阶段逐段通知
+
   监控群 (-5131273722) 推送节点：
     • Step 1: 分配单
-    • Step 1.5: Spec-Kit 结果
+    • Step 1.5: Constitution / Plan / Review 结果
     • Step 2: 开发完成
     • Step 2.5: 冒烟结果
     • Step 3: 审查结论
@@ -386,14 +438,17 @@
     • Step 7: 交付摘要
 
   各 agent 职能群推送：
+    • gemini / 织梦 → 织梦群 (-5264626153)
+    • Claude Code → 计划群 / 对应职能群
+    • GPT → 审核群 / 对应职能群
     • review → 交叉审核群 (-5242448266)
     • coding → 代码编程群 (-5039283416)
     • test → 代码测试群 (-5245840611)
-    • brainstorming → 头脑风暴群 (-5231604684)
+    • brainstorming / 灵感熔炉 → 灵感熔炉群 (-5231604684)
     • docs → 项目文档群 (-5095976145)
-    • 织梦(gemini) → 织梦群 (-5264626153)
+    • notebooklm / 珊瑚 → 珊瑚群 (-5202217379)
 
-  ⚠️  sub-agent 推送不可靠，关键推送由 main 补发
+  ⚠️  同一问题若沿同一方向连续三次仍未解决，必须换方向
 
 ═══════════════════════════════════════════════════════════
 ```
