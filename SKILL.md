@@ -5,28 +5,23 @@ description: 星链（StarChain）— OpenClaw 多 agent 协作锻造流水线 v
 
 # 星链 StarChain v2.8
 
-星链是 OpenClaw 的多 agent 协作流水线，采用 Launcher Script 一键启动模式，main（小光）不在私聊里串联，符合"主私聊不承载长编排"约束。
+星链是 OpenClaw 的多 agent 协作流水线，由 main（小光）通过 isolated session 编排执行。当晨星说"用星链实现 XXX"时，main 自动启动流水线，主私聊立即释放，流水线完成后通知晨星。
 
 使用本 skill 执行开发和修复任务，遵循 `references/pipeline-v2-8-contract.md` 中的流水线合约。
 
 ## 快速参考
 
 ### 一句话
-**Launcher Script 一键启动 → Gemini 扫问题 → NotebookLM 深度研究 → GPT-5.4 定规则 → Claude 出计划 → Gemini 复核 → Spec-Kit 落地**
+**告诉 Main "用星链实现 XXX" → Main 编排 isolated session → Gemini 扫问题 → NotebookLM 深度研究 → GPT-5.4 定规则 → Claude 出计划 → Gemini 复核 → Spec-Kit 落地**
 
 ### 快速启动
 
-```bash
-# 一键启动星链流水线
-~/.openclaw/skills/starchain/scripts/starchain-launcher.sh \
-  "实现用户登录功能" \
-  L2
-
-# 带项目路径
-~/.openclaw/skills/starchain/scripts/starchain-launcher.sh \
-  "优化数据库查询性能" \
-  L3 \
-  ~/projects/myapp
+```
+晨星: "用星链实现用户登录功能，L2"
+Main: "收到！已启动星链流水线 L2，运行 ID: starchain_20260313_001234"
+      → 主私聊立即释放
+      → 流水线在 isolated session 中执行
+      → 完成后通知晨星
 ```
 
 ### v2.8 核心改进
@@ -35,12 +30,7 @@ description: 星链（StarChain）— OpenClaw 多 agent 协作锻造流水线 v
 2. **证据驱动规则**：宪法基于 NotebookLM 的历史教训制定，避免重复踩坑
 3. **Brainstorming 动态模型**：根据任务级别和轮次动态选择 sonnet/opus
 4. **与星鉴统一**：NotebookLM 深度参与模式与星鉴流水线一致
-
-### v2.7 核心改进
-
-1. **Launcher Script 模式**：Main 不再在私聊里串联，改用一键启动脚本
-2. **主私聊不占线**：符合"主私聊不承载长编排"约束
-3. **统一独立性规则**：与星鉴流水线统一仲裁规则
+5. **Main 编排 + isolated session**：用户体验优化，告诉 Main 即可启动，主私聊不占线
 
 ### 三模型职责
 - **Gemini（织梦）**: 扫描歧义/边界/风险 + 反方 review（不定规则、不仲裁）
@@ -79,11 +69,20 @@ description: 星链（StarChain）— OpenClaw 多 agent 协作锻造流水线 v
 ## When This Skill Triggers
 
 Trigger this skill when the user asks to:
+- "用星链实现 XXX"
+- "星链开发 XXX 功能"
 - run the cross-review pipeline
 - assign work across coding/test/docs/monitor/brainstorming/gemini/claude
 - enforce Step 1.5 + 1.5S constitution/spec-kit gates
 - handle Step 3/4/5 verdict loops and Epoch fallback
 - create constitutions/plans/tasks for a feature
+
+**Main 的职责**：
+1. 接收任务："用星链实现 XXX，L2"
+2. 立即回复："收到！已启动星链流水线 L2，运行 ID: starchain_YYYYMMDD_HHMMSS"
+3. Spawn isolated session 执行整个流水线
+4. 主私聊立即释放
+5. 流水线完成后通过 announce 通知晨星
 
 ## Required Read
 
@@ -249,6 +248,39 @@ Critical consistency issues block Step 2. Brainstorming agent executes; main orc
 Legacy inspiration: https://github.com/github/spec-kit
 
 ## Main 编排流程（逐步执行）
+
+### 执行模式：Isolated Session
+
+**Main 收到任务后的流程**：
+
+1. **立即回复晨星**：
+   ```
+   收到！已启动星链流水线 L2
+   运行 ID: starchain_20260313_001234
+   ```
+
+2. **Spawn isolated session**：
+   ```javascript
+   sessions_spawn({
+     agentId: "main",
+     mode: "run",
+     task: "执行星链流水线 L2：实现用户登录功能\n\n[完整任务描述和上下文]",
+     runTimeoutSeconds: 3600
+   })
+   ```
+
+3. **主私聊立即释放**：晨星可以继续使用主私聊做其他事
+
+4. **流水线在 isolated session 中执行**：按照下面的 Step 1-7 逐步推进
+
+5. **完成后 announce 通知**：流水线完成后，通过 announce 机制通知晨星
+
+**优点**：
+- ✅ 用户体验好：只需告诉 Main "用星链实现 XXX"
+- ✅ 主私聊不占线：可以同时做其他事
+- ✅ Main 职责清晰：保持顶层编排中心的角色
+
+---
 
 ### Step 1：分级 + 类型分析 + 风险判断
 main 自己执行：
