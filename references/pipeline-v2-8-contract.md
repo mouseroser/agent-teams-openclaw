@@ -57,7 +57,19 @@ main（小光）
 - 符合"主私聊不承载长编排"约束
 - NotebookLM 深度参与，宪法基于历史经验
 - 证据驱动规则，避免重复踩坑
-```
+
+### 产出目录规范
+
+**所有星链流水线产物统一存放于 `intel/collaboration/starchain/`**，不再散落在各 agent 目录。
+
+| 目录 | 内容 |
+|------|------|
+| `specs/` | 宪法、计划、Spec-Kit、代码 |
+| `reviews/` | 扫描报告、一致性复核、Step3 双审 |
+| `arbitration/` | 仲裁结论 |
+| `research/` | NotebookLM 历史经验调研 |
+| `test/` | 测试报告 |
+| `docs/` | 交付文档 |
 
 ---
 
@@ -96,7 +108,7 @@ main（小光）
 - 盲点清单（容易忽略的地方）
 - 待验证假设（依赖的前提条件）
 
-**保存位置**: `~/.openclaw/workspace/agents/gemini/reports/scan-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/reviews/scan-YYYYMMDD_HHMMSS.md`
 
 #### Step 1.5B: NotebookLM 深度研究（提前介入，新位置）
 
@@ -112,7 +124,7 @@ main（小光）
 - 参考实现（可以参考的代码片段或模板）
 - 宪法建议（基于历史教训的约束建议）
 
-**保存位置**: `~/.openclaw/workspace/agents/notebooklm/implementation-advice-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/research/implementation-advice-YYYYMMDD_HHMMSS.md`
 
 **核心价值**：
 - 为宪法制定提供历史证据
@@ -132,7 +144,7 @@ main（小光）
 - 证据门槛
 - 输出格式
 
-**保存位置**: `~/.openclaw/workspace/agents/openai/reports/constitution-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/specs/constitution-YYYYMMDD_HHMMSS.md`
 
 **改进点**：宪法不再是主观制定，而是基于历史数据和证据
 
@@ -148,7 +160,7 @@ main（小光）
 - 风险控制（基于 NotebookLM 常见坑点）
 - 验证方式
 
-**保存位置**: `~/.openclaw/workspace/agents/claude/reports/plan-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/specs/plan-YYYYMMDD_HHMMSS.md`
 
 **改进点**：计划基于历史最佳实践，而非从零开始
 
@@ -163,7 +175,7 @@ main（小光）
 - DRIFT：轻微偏离
 - MAJOR_DRIFT：严重偏离
 
-**保存位置**: `~/.openclaw/workspace/agents/gemini/reports/review-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/reviews/consistency-YYYYMMDD_HHMMSS.md`
 
 #### Step 1.5F: 仲裁（按需）
 
@@ -179,7 +191,7 @@ main（小光）
 
 **输出**: GO / REVISE / BLOCK
 
-**保存位置**: `~/.openclaw/workspace/agents/openai/reports/arbitration-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/arbitration/decision-YYYYMMDD_HHMMSS.md`
 
 #### Step 1.5G: Brainstorming 落地 Spec-Kit（动态模型）
 
@@ -196,7 +208,7 @@ main（小光）
 - `tasks.md`：开发任务清单
 - `research.md`：技术调研
 
-**保存位置**: `~/.openclaw/workspace/agents/brainstorming/specs/spec-kit-YYYYMMDD_HHMMSS/`
+**保存位置**: `intel/collaboration/starchain/specs/spec-kit-YYYYMMDD_HHMMSS/`
 
 **改进点**：
 - 动态模型选择，降本 30-40%
@@ -206,7 +218,7 @@ main（小光）
 - 证据门槛
 - 输出格式
 
-**保存位置**: `~/.openclaw/workspace/agents/openai/reports/constitution-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/specs/constitution-YYYYMMDD_HHMMSS.md`
 
 #### Step 1.5C: Claude 计划
 
@@ -220,7 +232,7 @@ main（小光）
 - 风险控制
 - 验证方式
 
-**保存位置**: `~/.openclaw/workspace/agents/claude/reports/plan-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/specs/plan-YYYYMMDD_HHMMSS.md`
 
 #### Step 1.5D: Gemini 一致性复核
 
@@ -233,7 +245,7 @@ main（小光）
 - DRIFT：轻微偏离
 - MAJOR_DRIFT：严重偏离
 
-**保存位置**: `~/.openclaw/workspace/agents/gemini/reports/review-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/reviews/consistency-YYYYMMDD_HHMMSS.md`
 
 #### Step 1.5E: 仲裁（按需）
 
@@ -249,7 +261,7 @@ main（小光）
 
 **输出**: GO / REVISE / BLOCK
 
-**保存位置**: `~/.openclaw/workspace/agents/openai/reports/arbitration-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/arbitration/decision-YYYYMMDD_HHMMSS.md`
 
 ---
 
@@ -260,7 +272,7 @@ main（小光）
 **输入**: Spec-Kit  
 **输出**: 代码 + Step 2.5 冒烟测试结果
 
-**保存位置**: `~/.openclaw/workspace/agents/coding/`
+**保存位置**: `intel/collaboration/starchain/specs/coding-YYYYMMDD_HHMMSS/`
 
 ---
 
@@ -276,7 +288,7 @@ main（小光）
 **输入**: 代码 + Spec-Kit  
 **输出**: 审查报告（是否符合规格和宪法）
 
-**保存位置**: `~/.openclaw/workspace/agents/claude/reports/review-step3-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/reviews/review-step3-YYYYMMDD_HHMMSS.md`
 
 #### Gemini Adversarial Review
 
@@ -286,7 +298,7 @@ main（小光）
 **输入**: 代码 + Spec-Kit  
 **输出**: 找漏洞、找风险、找不符合宪法的地方
 
-**保存位置**: `~/.openclaw/workspace/agents/gemini/reports/review-step3-YYYYMMDD_HHMMSS.md`
+**保存位置**: `intel/collaboration/starchain/reviews/review-step3-gemini-YYYYMMDD_HHMMSS.md`
 
 #### 仲裁（按需）
 
@@ -340,7 +352,7 @@ main（小光）
 **输入**: 代码 + Spec-Kit  
 **输出**: 测试报告
 
-**保存位置**: `~/.openclaw/workspace/agents/test/`
+**保存位置**: `intel/collaboration/starchain/test/test-YYYYMMDD_HHMMSS/`
 
 ---
 
@@ -390,7 +402,7 @@ main（小光）
 **输入**: 代码 + Spec-Kit  
 **输出**: 交付文档
 
-**保存位置**: `~/.openclaw/workspace/agents/docs/`
+**保存位置**: `intel/collaboration/starchain/docs/deliverable-YYYYMMDD_HHMMSS/`
 
 ---
 
