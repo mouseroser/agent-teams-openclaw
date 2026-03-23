@@ -449,9 +449,9 @@ sub-agent 只返回结果给 main，**不自己推群**。所有群通知由 mai
 
 | 类型 | 触发时机 | 发往 |
 |------|---------|------|
-| **START** | agent 开始执行本步骤时 | main 推送职能群 + 监控群 |
-| **COMPLETION** | agent 完成本步骤时（含结果摘要） | main 推送职能群 + 监控群 |
-| **FAILURE** | agent 遇到错误/卡点时 | main 推送职能群 + 监控群 |
+| **START** | agent 开始执行本步骤时 | main 推送职能群 + 监控群 + 晨星DM |
+| **COMPLETION** | agent 完成本步骤时（含结果摘要） | main 推送职能群 + 监控群 + 晨星DM |
+| **FAILURE** | agent 遇到错误/卡点时 | main 推送职能群 + 监控群 + 晨星DM |
 
 ### 通知内容要求
 - START/COMPLETION 必须包含：步骤名称、本步骤做了什么、下一步是什么
