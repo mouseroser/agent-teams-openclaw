@@ -213,11 +213,51 @@ Pass
 - investigate-root-cause
 - guard-mode
 
-### Still needs a cleaner dedicated validation task
+### Dedicated validation added
 - design-review-lite
 
+### Run 5 — Supplemental validation: design / IA sanity review
+
+#### Task
+助贷 CRM 系统的页面结构 / 信息组织 / 操作流梳理
+
+#### Plugin used
+- design-review-lite
+
+#### Why this qualifies
+Although the broader CRM task started as Lite planning, one real sub-problem inside it was explicitly product/design-shaped rather than implementation-shaped:
+- 页面怎么分
+- 线索列表、详情、跟进、转化看板如何组织
+- 哪些信息必须在第一屏
+- 哪些能力不该在 v1 暴露过多
+
+This is a genuine UI / IA / operator-flow design problem.
+
+#### What design-review-lite changed materially
+It changed the discussion from “what features should exist” into “how the operator will actually move through the system”.
+
+Useful review outputs included:
+- defining the core operator task first
+- separating primary workflow screens from secondary admin/config screens
+- identifying where too many CRM-like options would overload v1
+- making sure list → detail → follow-up → conversion progression stays short and legible
+- preferring fewer surfaces with clearer state transitions over a bloated general dashboard
+
+#### Design verdict
+**Build but simplify first**
+
 Reason:
-It has a good role definition, but it still lacks a purer UI / IA / interaction-shaping task where its contribution is isolated more clearly.
+- the system direction was good
+- but the useful first version needed tighter screen hierarchy and less option sprawl
+- operator clarity mattered more than feature breadth
+
+#### Key finding
+`design-review-lite` is useful as a pre-build shaping layer when the task has already been product-framed, but the interface structure still risks becoming too broad or too CRM-generic.
+
+#### Scores
+- clarity improvement: 4.5/5
+- reduction of UX/IA sprawl: 4.5/5
+- usefulness before implementation: 4.5/5
 
 ---
 
